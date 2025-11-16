@@ -1,29 +1,27 @@
-# Route Planning Visualizer
+# Project Omega - Interactive Route Planning Visualizer with Metrics
 
-*Next.js + React 19 + TypeScript + Tailwind CSS frontend with Leaflet maps, backed by a FastAPI + Uvicorn Python microservice using NumPy for graph-based route planning (Dijkstra/A\*/BFS/DFS/Greedy), OSMnx for OpenStreetMap data, and NDJSON streaming for real-time algorithm visualization.*
+*Modern Next.js 16 serverless application featuring an interactive Leaflet-based map interface with draggable waypoint markers, real-time algorithm visualization, and side-by-side performance comparisons of Dijkstra vs A\* pathfinding algorithms on Kuala Lumpur's road network.*
 
 ---
 
 ## 🚀 Features
 
-- **Interactive Map Interface**: Leaflet-based map with click-to-select start/end points
-- **Multiple Algorithms**: Dijkstra, A*, BFS, DFS, and Greedy search implementations
-- **Real-time Visualization**: NDJSON streaming endpoint for step-by-step algorithm execution
-- **Real Road Network**: Uses OpenStreetMap data via OSMnx for accurate route planning
-- **Performance Metrics**: Runtime tracking, visited nodes count, and distance calculations
-- **Smooth Animations**: Framer Motion for polished UI transitions
-
+- **Modular Waypoint System**: Click to place start/end markers, drag to reposition, Shift+Click to add stops
+- **Smart Waypoint Management**: Add stops between points automatically, reverse routes, manage multiple waypoints
+- **Real-time Algorithm Racing**: Watch Dijkstra vs A* execute simultaneously with live progress bars
+- **Algorithm Visualization Dashboard**: Side-by-side performance metrics with animated graphs showing node exploration
+- **Efficiency Analytics**: Real-time comparison showing % fewer nodes explored and time saved by A*
+  
 ---
 
 ## 📋 Prerequisites
 
 - **Node.js** (v18+ recommended)
-- **Python** (v3.8+ recommended)
 - **npm** or **yarn**
 
 ---
 
-## 🛠️ Installation
+## 🛠️ Installation & Setup
 
 ### 1. Clone the repository
 
@@ -32,92 +30,77 @@ git clone <your-repo-url>
 cd route_planning
 ```
 
-### 2. Install frontend dependencies
+### 2. Install dependencies
 
 ```powershell
 npm install
 ```
 
-### 3. Install backend dependencies
-
-```powershell
-cd api
-pip install -r requirements.txt
-```
-
-### 4. Build the road network graph (optional but recommended)
-
-The project includes a toy graph by default. For real road network data:
-
-```powershell
-cd api
-python build_graph.py
-```
-
-This will download OpenStreetMap data for Kuala Lumpur and generate `kl_graph.json` in the `api/data/` directory.
-
----
-
-## 🏃 Running the Application
-
-### Start the Backend API
-
-```powershell
-cd api
-uvicorn main:app --reload --port 8000
-```
-
-The API will be available at `http://localhost:8000`
-
-### Start the Frontend
-
-In a new terminal:
+### 3. Run development server
 
 ```powershell
 npm run dev
 ```
 
-The frontend will be available at `http://localhost:3000`
+The application will be available at `http://localhost:3000`
+
+### 4. Build for production
+
+```powershell
+npm run build
+npm start
+```
 
 ---
 
-## 📡 API Endpoints
+## 📡 API Routes (Serverless)
 
-### `GET /route`
+All API routes are Next.js serverless functions located in `app/api/`:
 
-Returns the complete route between two points.
+### `GET /api/route`
+
+Returns the complete route between two points using the specified algorithm.
 
 **Query Parameters:**
-- `src`: Start coordinates as `lat,lon` (e.g., `3.139,101.686`)
+- `src`: Start coordinates as `lat,lon` (e.g., `3.1578,101.7117`)
 - `dst`: End coordinates as `lat,lon`
 - `algo`: Algorithm to use (`dijkstra`, `astar`, `bfs`, `dfs`, `greedy`)
 
 **Response:**
 ```json
 {
-  "polyline": [{"lat": 3.139, "lng": 101.686}, ...],
-  "distance_m": 1234.56,
+  "polyline": [{"lat": 3.1578, "lng": 101.7117}, ...],
+  "distance_m": 15234.56,
   "time_s": null,
-  "runtime_ms": 45.67,
-  "visited_nodes": 89
+  "runtime_ms": 245.67,
+  "visited_nodes": 1289
 }
 ```
 
-### `GET /run`
+### `GET /api/graph`
 
-Streaming NDJSON endpoint for real-time algorithm visualization.
+Returns the complete graph structure (nodes and edges) for visualization.
 
-**Query Parameters:** Same as `/route`
+**Response:**
+```json
+{
+  "nodes": [{"id": 0, "lat": 3.139, "lng": 101.686}, ...],
+  "edges": [{"u": 0, "v": 1, "w": 123.45}, ...]
+}
+```
 
-**Response:** NDJSON stream with `type: "start"`, `type: "step"`, `type: "done"` events
+### `GET /api/info`
 
-### `GET /graph`
+Returns metadata about the loaded graph.
 
-Returns the complete graph structure (nodes and edges).
-
-### `GET /info`
-
-Returns metadata about the loaded graph (node count, edge count, graph type).
+**Response:**
+```json
+{
+  "num_nodes": 142218,
+  "num_edges": 382916,
+  "graph_type": "real_osm"
+}
+```
 
 ---
 
@@ -125,82 +108,51 @@ Returns metadata about the loaded graph (node count, edge count, graph type).
 
 ```
 route_planning/
-├── api/                       # Python FastAPI backend
-│   ├── main.py               # Main API server
-│   ├── algorithms_stream.py  # Graph algorithm implementations
-│   ├── build_graph.py        # OSMnx graph builder
-│   ├── download_roads.py     # Road network downloader
-│   ├── generate_grid.py      # Toy graph generator
-│   ├── requirements.txt      # Python dependencies
-│   ├── data/                 # Graph data files
-│   └── cache/                # API response cache
-├── app/                      # Next.js pages
-│   ├── page.tsx              # Main application page
-│   ├── layout.tsx            # Root layout
-│   └── globals.css           # Global styles
-├── public/                   # Static assets
-├── package.json              # Node.js dependencies
-├── next.config.ts            # Next.js configuration
-├── tsconfig.json             # TypeScript configuration
-└── tailwind.config.js        # Tailwind CSS configuration
+├── app/                      # Next.js App Router
+│   ├── page.tsx              # Main map interface with waypoint system
+│   ├── layout.tsx            # Root layout with fonts
+│   ├── globals.css           # Global styles
+│   └── api/                  # Serverless API routes
+│       ├── route/
+│       │   └── route.ts      # Pathfinding algorithm endpoint
+│       ├── graph/
+│       │   └── route.ts      # Graph data endpoint
+│       └── info/
+│           └── route.ts      # Graph metadata endpoint
+└── src/
+     └── data/
+        └── kl_graph.json     # 142K node KL road network
+
 ```
 
 ---
 
-## 🧪 Available Algorithms
+## 🧪 Pathfinding Algorithms
 
-| Algorithm | Description | Use Case |
-|-----------|-------------|----------|
-| **Dijkstra** | Shortest path with uniform cost | Guaranteed optimal path |
-| **A*** | Heuristic-guided search | Faster than Dijkstra with good heuristic |
-| **BFS** | Breadth-first search | Unweighted shortest path |
-| **DFS** | Depth-first search | Exploratory, not optimal |
-| **Greedy** | Always move closer to goal | Fast but not optimal |
+| Algorithm | Status | Description | Performance |
+|-----------|--------|-------------|-------------|
+| **A*** | ✅ Planned | Heuristic-guided (Haversine) | 40-60% fewer nodes than Dijkstra |
+| **Dijkstra** | ✅ Planned | Shortest path guarantee | Explores all directions evenly |
+| **BFS** | ✅ Planned | Breadth-first search | Good for unweighted graphs |
+| **DFS** | ✅ Planned | Depth-first search | Exploratory, not optimal |
+| **Greedy** | ✅ Planned | Best-first with heuristic | Fast but suboptimal |
 
 ---
 
 ## 🎨 Tech Stack
 
-### Frontend
-- **Next.js 16** - React framework with SSR/SSG
-- **React 19** - UI library
-- **TypeScript** - Type safety
-- **Tailwind CSS** - Utility-first styling
-- **Leaflet** - Interactive maps
-- **Framer Motion** - Animation library
-- **Lucide React** - Icon library
+### Frontend & Backend (Unified)
+- **Next.js 16** (Turbopack) - React framework with serverless API routes
+- **React 19** - UI library with latest features
+- **TypeScript 5** - Type safety across frontend and backend
+- **Tailwind CSS 4** - Utility-first styling with new oxide engine
+- **Leaflet 1.9.4** - Interactive map library with custom markers
+- **Lucide React** - Modern icon library
 
-### Backend
-- **FastAPI** - Modern Python web framework
-- **Uvicorn** - ASGI server
-- **NumPy** - Numerical computing
-- **OSMnx** - OpenStreetMap network analysis
-- **NetworkX** - Graph data structures
+### Data & Algorithms
+- **OpenStreetMap** - Real road network data (via pre-built graph)
+- **Haversine Formula** - Great-circle distance for A* heuristic
+- **Graph Structure** - Adjacency list with ~380K edges
 
 ---
 
-## 🔧 Development
-
-### Build for production
-
-```powershell
-npm run build
-npm run start
-```
-
-### Linting
-
-```powershell
-npm run lint
-```
-
----
-
-## 📝 Notes
-
-- The backend uses CORS middleware to allow frontend requests from any origin
-- Graph data is cached in JSON format for fast loading
-- The nearest node to clicked coordinates is automatically selected
-- All algorithms return visited node counts for performance comparison
-
----
