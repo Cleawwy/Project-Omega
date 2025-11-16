@@ -1,6 +1,6 @@
 # Route Planning Visualizer
 
-**Next.js + React 19 + TypeScript + Tailwind CSS frontend with Leaflet maps, backed by a FastAPI + Uvicorn Python microservice using NumPy for graph-based route planning (Dijkstra/A*/BFS/DFS/Greedy), OSMnx for OpenStreetMap data, and NDJSON streaming for real-time algorithm visualization.**
+*Next.js + React 19 + TypeScript + Tailwind CSS frontend with Leaflet maps, backed by a FastAPI + Uvicorn Python microservice using NumPy for graph-based route planning (Dijkstra/A\*/BFS/DFS/Greedy), OSMnx for OpenStreetMap data, and NDJSON streaming for real-time algorithm visualization.*
 
 ---
 
