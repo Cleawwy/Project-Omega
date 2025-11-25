@@ -19,7 +19,7 @@
 > 1. Clone the repo  
 > ```bash
 > git clone <your-repo-url>
-> cd route_planning
+> cd Project-Omega
 > ```
 > 2. Install deps  
 > ```bash
