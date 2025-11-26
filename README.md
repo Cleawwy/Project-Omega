@@ -1,6 +1,6 @@
 > ## 📍 Project Omega — Route Planning Visualizer
 > Interactive route-planning tool built with Next.js. Lets you place waypoints on a Leaflet map, compare Dijkstra and A* side-by-side, and visualize how each algorithm explores Kuala Lumpur’s road network.
->
+> <br>Vercel: https://p-omega-deployment.vercel.app/
 > ---
 > ### 🚀 Features
 > - Place start/end points with clicks; drag to move; Shift+Click to add stops  
